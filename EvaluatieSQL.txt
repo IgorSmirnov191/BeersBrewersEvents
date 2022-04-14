@@ -1,0 +1,158 @@
+#Welke brouwers hebben een omzet van minstens 140.000
+use javadevt_DotNetVlaanderen4;
+SELECT *
+FROM Brewers
+WHERE Turnover> 140000
+ORDER BY Turnover desc
+
+#Geef de Id en naam van alle bieren waarbij de naam “fontein” bevat.
+#Hou rekening met verschillen in Casing
+use javadevt_DotNetVlaanderen4;
+SELECT Id, Name
+FROM Beers
+WHERE upper(Name) Like '%FONTEIN%'
+
+#Toon de 5 duurste bieren van de brouwer met de meeste omzet
+use javadevt_DotNetVlaanderen4;
+(SELECT Beers.Id,
+Beers.Name as 'Naam', 
+Beers.Price as 'Prijs',
+'Met meeste omzet' as 'Van brouwer'
+FROM Beers inner join Brewers
+ON Beers.BrewerId = Brewers.Id
+WHERE Brewers.Turnover = 
+(
+SELECT max( Brewers.Turnover)
+FROM  Brewers
+) 
+ORDER BY  Beers.Price desc
+LIMIT 5)
+UNION
+#Toon ook de 5 duurste bieren van de brouwer met de minste omzet
+(SELECT  Beers.Id, 
+ Beers.Name as 'Naam',
+ Beers.Price as 'Prijs',
+'Met minste omzet' as 'Van brouwer'
+FROM  Beers inner join  Brewers
+ON  Beers.BrewerId =  Brewers.Id
+WHERE  Brewers.Turnover = 
+(
+SELECT MIN( Brewers.Turnover)
+FROM  Brewers
+) 
+ORDER BY  Beers.Price desc
+LIMIT 5)
+
+#Geef de namen van alle brouwers die in Sint-Jans-Molenbeek, Leuven of Antwerpen wonen
+#Toon ook de naam en het alcoholpercentage van hun bieren.
+#Sorteer op omzet.
+use javadevt_DotNetVlaanderen4;
+SELECT  Beers.Name, 
+ Beers.Alcohol,
+ Brewers.Name
+FROM  Brewers right join  Beers
+ON  Brewers.Id =  Beers.BrewerId
+WHERE  Brewers.City ='Sint-Jans-Molenbeek' 
+OR  Brewers.City = 'Leuven'
+OR  Brewers.City = 'Antwerpen'
+ORDER BY  Brewers.Turnover desc
+
+#Geef het aantal bieren per brouwer.
+#Toon ook de naam van de brouwerij.
+#Toon enkel de brouwerijen die meer dan 5 bieren brouwen.
+#Soorteer van hoogste aantal bieren per brouwerij naar het minste.
+use javadevt_DotNetVlaanderen4;
+SELECT COUNT( Beers.Id) AS 'Aantal Bieren', Brewers.Name AS 'Brower'
+FROM  Brewers inner JOIN  Beers
+ON  Brewers.Id =  Beers.BrewerId
+GROUP BY  Brewers.Id
+HAVING count( Beers.Id)>5
+ORDER BY count( Beers.Id) DESC
+
+#Toon alle informatie van de bieren met een percentage van minstens 7%.
+#Toon ook alle gerelateerde data.
+#Vermijd duplicate data.
+#Geef bij kolommen met dezelfde namen een duidelijke beschrijving
+#Sorteer aflopend op het alcoholpercentage.
+use javadevt_DotNetVlaanderen4;
+SELECT  Beers.Name AS 'Bier', Beers.Alcohol, Beers.Price AS 'Prijs', Brewers.Name AS 'Brower'
+FROM  Brewers inner join  Beers
+ON  Brewers.Id =  Beers.BrewerId
+WHERE  Beers.Alcohol > 7
+ORDER BY Beers.Alcohol desc
+
+#Geef de bieren met een alcoholpercentage 
+#van meer dan 7 procent van de brouwers die meer dan 65.000 omzet verdienen
+#Sorteer op omzet, daarna op alcoholpercentage
+#Toon ook de categorie van deze bieren
+use javadevt_DotNetVlaanderen4;
+SELECT  Beers.Name AS 'Bier', Beers.Alcohol, Beers.Price AS 'Prijs', Categories.Category, Brewers.Name AS 'Brower'
+FROM  Beers inner join  Brewers
+ON  Brewers.Id =  Beers.BrewerId
+INNER JOIN  Categories 
+ON  Beers.CategoryId =  Categories.Id
+WHERE  Brewers.Turnover > 65000
+ORDER BY  Brewers.Turnover desc, Alcohol desc
+
+#Geef het aantal bieren per categorie in een menselijk leesbare vorm.
+#Sorteer op naam van de categorie
+#Toon enkel de volgende bieren: Lambik,  AlcolholVrij, Pils, Edelbier, Amber, Light
+#Hou er rekening mee dat bovenstaande selectie makkelijk kan veranderen in de toekomst.
+#Hoe zorgen we ervoor dat deze lijst makkelijk leesbaar en aanpasbaar is?
+use javadevt_DotNetVlaanderen4;
+SELECT Categories.Category ,count(Beers.Id) as 'Aantal bieren' 
+FROM  Beers INNER JOIN  Categories
+ON  Beers.CategoryId =  Categories.Id
+WHERE  Categories.Category 
+IN ('Lambik',  'AlcoholVrij', 'Pils', 'Edelbier', 'Amber', 'Light') /*makelijk kan veranderen*/
+GROUP BY  Beers.CategoryId
+
+#Toon de bieren die door meer dan 1 brouwerij gebrouwen worden.
+#Toon alle relevante gerelateerde data.
+#Sla dit resultaat op als een View
+#Toon aan dat je view dynamisch is door data te wijzigen.
+#Neem screenshots van voor en na.
+use javadevt_DotNetVlaanderen4;
+CREATE view more_than_one_brewery_beers( Name, Alcohol, Category, Brewer ) AS
+SELECT Beers.Name, Beers.Alcohol, Categories.Category, Brewers.Name
+FROM Beers INNER JOIN Categories
+ON Beers.CategoryId = Categories.Id
+INNER JOIN Brewers
+ON Beers.BrewerId = Brewers.Id
+WHERE Beers.Name
+IN (
+SELECT Name
+FROM Beers
+GROUP BY Name,Alcohol,CategoryId
+HAVING count(Name)>1
+)
+ORDER BY Beers.Name;
+
+select * from javadevt_DotNetVlaanderen4.more_than_one_brewery_beers
+
+
+#Maak een Stored Procedure met 2 input parameters. 
+#Laat deze query alle bieren ophalen die aan de volgende parameters voldoen:
+#Een keyword dat voorkomt in de naam van het bier
+#De maximum omzet van de brouwer
+#Het is niet voldoende om enkel de Stored Procedure in je DB te hebben. 
+#Toon ook de SQL code die je nodig had voor dit statement te maken.
+DELIMITER //
+use javadevt_DotNetVlaanderen4//
+CREATE PROCEDURE spGetBeersByNameAndTurnover
+( IN P_NAAM VARCHAR(100),
+  IN P_MAX_OMZET_BROUWER INTEGER
+)
+BEGIN
+    SET P_MAX_OMZET_BROUWER = IFNULL(P_MAX_OMZET_BROUWER,(SELECT MAX(Turnover) FROM Brewers));
+	SELECT Beers.Name, Brewers.Name, Categories.Category, Beers.Price, Beers.Alcohol
+	FROM Beers INNER JOIN Brewers
+	ON Beers.BrewerId = Brewers.Id 
+	INNER JOIN Categories
+	ON Beers.CategoryId = Categories.Id
+	WHERE Beers.Name LIKE CONCAT('%',P_NAAM, '%')
+	AND Brewers.Turnover <= P_MAX_OMZET_BROUWER;
+END//
+DELIMITER ;
+
+call SP_GET_ALLE_BIEREN('blonde', 140000);

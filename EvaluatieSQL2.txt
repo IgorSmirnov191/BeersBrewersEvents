@@ -1,0 +1,94 @@
+use javadevt_DotNetVlaanderen4;
+#Toon de Brouwers die aan geen enkel evenement hebben deelgenomen
+SELECT Id, Name, City
+FROM  Brewers 
+WHERE Id NOT IN
+(
+    SELECT BrewerId FROM EvenementsBrewers
+    GROUP BY BrewerId
+);
+
+
+#Toon alle evenementen die plaatsvinden of plaatsvonden in het huidige jaar.
+#Toon de evenementen, alsook de bieren en de brouwers die hier getapt worden.
+#Sla deze informatie op als View
+use javadevt_DotNetVlaanderen4;
+CREATE view eve_beers_curentyear( Name, City, Beer, Brewer ) AS 
+SELECT Evenements.Name, Evenements.City, Beers.Name, Brewers.Name
+FROM  EvenementsBrewers inner join Evenements
+ON EvenementsBrewers.EveId = Evenements.Id 
+INNER JOIN Brewers
+ON EvenementsBrewers.BrewerId = Brewers.Id 
+INNER JOIN Beers
+ON EvenementsBrewers.BeerId = Beers.Id
+WHERE EvenementsBrewers.EveId 
+IN
+(
+SELECT EveId 
+FROM EventsSchedule
+WHERE Year(EventsSchedule.StartEvent) = Year(now()) OR Year(EventsSchedule.EndEvent)=Year(now())
+);
+
+
+select * from eve_beers_curentyear;
+
+#Toon het aantal evenementen per organisatie.
+#Toon minstens het nummer en de naam van de organisatie alsook het evenement
+SELECT  Organizations.Id as Nummer, Organizations.Name as Organisatie, Evenements.Name as Evenement , count(Evenements.Id) as Aantal
+FROM Evenements inner join Organizations
+ON Evenements.OrganizationId = Organizations.Id
+GROUP BY Organizations.Id;
+
+#Geef de namen van alle brouwers die in een stad wonen waar meer dan 2 evenementen plaatsvonden.
+SELECT Brewers.Name
+FROM Brewers
+WHERE City 
+IN
+(
+SELECT City 
+FROM Evenements 
+GROUP BY City 
+HAVING count(id)> 2
+);
+
+#Toon alle bieren met hun categorie die op gratis festivals getapt werden.
+SELECT Beers.Name, Categories.Category
+FROM Beers INNER JOIN Categories
+ON  Beers.CategoryId = Categories.Id
+WHERE Beers.Id 
+IN
+(
+SELECT EvenementsBrewers.BeerId
+FROM EvenementsBrewers INNER JOIN Evenements
+ON EvenementsBrewers.EveId = Evenements.Id
+WHERE Evenements.IncomePrice = 0
+);
+
+#Toon alle cafés met mannelijke eigenaars die binnen 5 jaar op pensioen zullen gaan
+#Hiervoor mag je uitgaan dat de pensioenleeftijd 65 jaar is
+SELECT Cafes.Name as Cafe
+FROM Cafes INNER JOIN Managers
+ON Cafes.ManagerId = Managers.Id
+WHERE Managers.Sex ='M'
+AND (Year(now()) - Year(Managers.DateOfBirth)) >= 60;
+
+#Toon de eigenaars die meer dan 1 café uitbaten.
+SELECT Managers.Firstname, Managers.Surname
+From Cafes INNER JOIN Managers
+ON Cafes.ManagerId = Managers.Id
+GROUP BY Managers.Id
+HAVING COUNT(Managers.Id)>1;
+
+#Maak een View aan van alle Leffe bieren die de voorbije 3 jaar op een evenement zijn getapt geweest
+CREATE view eve_all_leffebiers_last3year( BierName ) AS
+SELECT Beers.Name
+FROM EvenementsBrewers INNER JOIN Beers
+ON Beers.Id = EvenementsBrewers.BeerId
+INNER JOIN EventsSchedule
+ON EvenementsBrewers.EveId = EventsSchedule.EveId
+WHERE ((Year(now()) - Year(EventsSchedule.StartEvent))<=3 OR (Year(now()) - Year(EventsSchedule.EndEvent))<=3)
+AND Beers.Name Like '%leffe%'
+group by Beers.Name;
+
+select * from eve_all_leffebiers_last3year;
+

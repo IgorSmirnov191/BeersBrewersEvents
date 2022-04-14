@@ -1,0 +1,127 @@
+use javadevt_DotNetVlaanderen4;
+
+#managers
+# Jan Janssens, 1966-08-23, gender neutral, Veltwijcklaan 2, 2180, Antwerpen
+insert Managers(Firstname,Surname,DateOfBirth,Sex,Address,ZipCode,City) values('Jan', 'Janssens', cast('1966-08-23' as date), 'N', 'Veltwijcklaan 2', '2180', 'Antwerpen');
+
+# Jeff Jeffson, 1962-01-01, man, Markt 4, 2180, Antwerpen
+insert Managers(Firstname,Surname,DateOfBirth,Sex,Address,ZipCode,City) values('Jeff', 'Jeffson', cast('1962-01-01' as date), 'M', 'Markt 4', '2180', 'Antwerpen');
+
+# Denis Cools, 1964-12-28, vrouw, Veltwijcklaan 78, 2180, Antwerpen
+insert Managers(Firstname,Surname,DateOfBirth,Sex,Address,ZipCode,City) values('Denis', 'Cools', cast('1964-12-28' as date), 'V', 'Veltwijcklaan 78', '2180', 'Antwerpen');
+
+# Mark Bohemen, 1971-08-17, man, Driehoekstraat 14, 2180, Antwerpen
+insert Managers(Firstname,Surname,DateOfBirth,Sex,Address,ZipCode,City) values('Mark', 'Bohemen, van', cast('1971-08-17' as date), 'M', 'Driehoekstraat 14', '2180', 'Antwerpen');
+
+#cafes
+# Café Friends, ub Denis Cools, Kloosterstraat 146, 2180, Antwerpen, vanaf 2002 
+insert Cafes(Name, ManagerId, Address, ZipCode, City, YearOfOpening) values('Café Friends', (select id from Managers where surname = 'Cools' and firstname = 'Denis' and year(dateofbirth) = 1964), 'Kloosterstraat 146','2180', 'Antwerpen',2002);
+
+# Het District, ub Mark Bohemen, Veltwijcklaan 48, 2180, Antwerpen, vanaf 2015
+insert Cafes(Name, ManagerId, Address, ZipCode, City, YearOfOpening) values('Het District', (select id from Managers where surname Like '%Bohemen%' and firstname = 'Mark' and year(dateofbirth) = 1971), 'Veltwijcklaan 48','2180', 'Antwerpen',2015);
+
+# Taverne Rozemaai, ub Mark Bohemen, Ekersesteenweg 4A, 2130, Antwerpen, vanaf 1995   
+insert Cafes(Name, ManagerId, Address, ZipCode, City, YearOfOpening) values('Taverne Rozemaai', (select id from Managers where surname Like '%Bohemen%' and firstname = 'Mark' and year(dateofbirth) = 1971), ' Ekersesteenweg 4A','2130', 'Antwerpen',1995);
+
+# Brasserie Hof de Bist, ub Jan Janssens, Veltwijcklaan 254, 2180, Antwerpen, vanaf 2002 
+insert Cafes(Name, ManagerId, Address, ZipCode, City, YearOfOpening) values('Brasserie Hof de Bist', (select id from Managers where surname = 'Janssens' and firstname = 'Jan' and year(dateofbirth) = 1966), 'Veltwijcklaan 254','2180', 'Antwerpen',2002);
+
+# Café Veltwijck, ub Jeff Jeffson, Veltwijcklaan 78, 2180, Antwerpen, vanaf 1996 
+insert Cafes(Name, ManagerId, Address, ZipCode, City, YearOfOpening) values('Café Veltwijck', (select id from Managers where surname = 'Jeffson' and firstname = 'Jeff' and year(dateofbirth) = 1962), 'Veltwijcklaan 78','2180', 'Antwerpen', 1996);
+
+#EvenementTypes
+insert  EvenementTypes (Description) values('Tentoonstelling');
+insert  EvenementTypes (Description) values('Eet- of drankfestijn');
+insert  EvenementTypes (Description) values('Kamp of vakantie');
+insert  EvenementTypes (Description) values('Concert');
+insert  EvenementTypes (Description) values('Lezing of congres');
+
+#Organizations
+insert  Organizations (Name) values('Parochiefederatie Ekeren');
+insert  Organizations (Name) values('Sporting A i.s.m. Fit & Fun Sport');
+insert  Organizations (Name) values('Bibliotheek Driehoek');
+insert  Organizations (Name) values('cc Binder');
+insert  Organizations (Name) values('vzw Ekerse Theaterzaal');
+insert  Organizations (Name) values('Tracé Cultuurstation');
+
+#Evenements
+
+#Event Partie Plezier,Tentoonstelling, Breendonk-Dorp 95, 2870 Puurs, Tracé Cultuurstation, gratis 
+insert Evenements (Name, Type, Address, ZipCode, City, OrganizationId) value('Partie Plezier',(select Id from EvenementTypes where Description = 'Tentoonstelling'), 'Breendonk-Dorp 95', '2870','Puurs', (select Id from Organizations where Name Like '%Cultuurstation%'));
+
+#Event Fit & Fun minisport (Antwerpen) - krokus, Kamp of vakantie, Sportcentrum 't VennekeDen Geer 21  Antwerpen BE-2180, Sporting A i.s.m. Fit & Fun Sport, prijs 80e 
+insert Evenements (Name, Type, Address, ZipCode, City, OrganizationId, IncomePrice) value('Fit & Fun minisport (Antwerpen) - krokus',(select Id from EvenementTypes where Description Like '%Kamp%'), "Sportcentrum 't VennekeDen Geer 21", '2180', 'Antwerpen', (select Id from Organizations where Name Like '%Sporting A i.s.m. Fit & Fun Sport%'), 80);
+
+#Event Koffiestop 2022, Eet- of drankfestijn,Wekelijkse Markt Kristus Koningplein 2180 Antwerpen, Parochiefederatie Ekeren, gratis
+insert Evenements (Name, Type, Address, ZipCode, City, OrganizationId) value('Koffiestop 2022',(select Id from EvenementTypes where Description = 'Eet- of drankfestijn'), 'Wekelijkse Markt Kristus Koningplein', '2180', 'Antwerpen', (select Id from Organizations where Name Like '%Parochiefederatie Ekeren%'));
+
+#Event Günther Neefs - Roots 66, Concert, Forum 9 2870 Puurs, cc Binder, 40e 
+insert Evenements (Name, Type, Address, ZipCode, City, OrganizationId, IncomePrice) value('Günther Neefs - Roots 66',(select Id from EvenementTypes where Description = 'Concert'), 'Forum 9', '2870','Puurs', (select Id from Organizations where Name Like '%cc Binder%'), 40);
+
+#Event Lady Minn - intiem duo concert, Concert,Ekerse Theaterzaal Oorderseweg 8,2180 Ekeren,vzw Ekerse Theaterzaal, 16
+insert Evenements (Name, Type, Address, ZipCode, City, OrganizationId, IncomePrice) value('Lady Minn - intiem duo concert',(select Id from EvenementTypes where Description Like '%Concert%'), "Ekerse Theaterzaal Oorderseweg 8", '2180', 'Antwerpen', (select Id from Organizations where Name Like '%vzw Ekerse Theaterzaal%'), 16);
+
+# subtable EvenementsBrewers 
+#Partie Plezier Duvel - duvel rood
+insert EvenementsBrewers(EveId,BrewerId,BeerId) values((select Id from Evenements where Name Like '%Partie Plezier%'),(select BrewerId from Beers where Upper(Name) = 'DUVEL ROOD' ), (select Id from Beers where Upper(Name) = 'DUVEL ROOD'));
+
+#Partie Plezier Palm (Speciale)
+insert EvenementsBrewers(EveId,BrewerId,BeerId) values((select Id from Evenements where Name Like '%Partie Plezier%'),(select BrewerId from Beers where Name = 'Palm (Speciale)'), (select Id from Beers where Name = 'Palm (Speciale)'));
+
+#Partie Plezier Leffe blonde
+insert EvenementsBrewers(EveId,BrewerId,BeerId) values((select Id from Evenements where Name Like '%Partie Plezier%'),(select BrewerId from Beers where Name = 'Leffe blonde'), (select Id from Beers where Name = 'Leffe blonde'));
+
+#Fit & Fun minisport (Antwerpen) - krokus stella alcoholvrij 
+insert EvenementsBrewers(EveId,BrewerId, BeerId) values((select Id from Evenements where Name Like '%Fit & Fun minisport (Antwerpen) - krokus%'),(select BrewerId from Beers where Name = 'Stella Artois NA'), (select Id from Beers where Name = 'Stella Artois NA'));
+
+#Fit & Fun minisport (Antwerpen) - krokus palm alcoholvrij
+insert EvenementsBrewers(EveId,BrewerId, BeerId) values((select Id from Evenements where Name Like '%Fit & Fun minisport (Antwerpen) - krokus%'),(select BrewerId from Beers where Name = 'Palm green'),(select Id from Beers where Name = 'Palm green'));
+
+#Koffiestop 2022 de koninck
+insert EvenementsBrewers(EveId,BrewerId, BeerId) values((select Id from Evenements where Name Like '%Koffiestop 2022%'),(select BrewerId from Beers where Name = 'De Koninck'), (select Id from Beers where Name = 'De Koninck'));
+
+#Koffiestop 2022 jupiler
+insert EvenementsBrewers(EveId,BrewerId, BeerId) values((select Id from Evenements where Name Like '%Koffiestop 2022%'),(select BrewerId from Beers where Name ='Jupiler'), (select Id from Beers where Name ='Jupiler'));
+
+#Günther Neefs - Roots 66,  Duvel - duvel rood
+insert EvenementsBrewers(EveId,BrewerId,BeerId) values((select Id from Evenements where Name Like '%Günther Neefs%'),(select BrewerId from Beers where Upper(Name) = 'DUVEL ROOD' ), (select Id from Beers where Upper(Name) = 'DUVEL ROOD'));
+
+#Günther Neefs - Roots 66,  Duvel - duvel groen
+insert EvenementsBrewers(EveId,BrewerId,BeerId) values((select Id from Evenements where Name Like '%Günther Neefs%'),(select BrewerId from Beers where Upper(Name) = 'DUVEL GROEN' ), (select Id from Beers where Upper(Name) = 'DUVEL GROEN'));
+
+#Lady Minn - intiem duo concert jupiler
+insert EvenementsBrewers(EveId,BrewerId, BeerId) values((select Id from Evenements where Name Like '%Lady Minn - intiem duo concert%'),(select BrewerId from Beers where Name ='Jupiler'), (select Id from Beers where Name ='Jupiler'));
+
+# subtable EventsSchedule
+#Partie Plezier 02/03(19u30-22u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Partie Plezier%'), cast('2022-03-02T19:30:00' as datetime),cast('2022-03-02T22:30:00' as datetime));
+
+#Partie Plezier 5/03(14u-18u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Partie Plezier%'), cast('2022-03-05T14:00:00' as datetime),cast('2022-03-05T18:00:00' as datetime));
+
+#Partie Plezier 6/03(14u-18u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Partie Plezier%'), cast('2022-03-06T14:00:00' as datetime),cast('2022-03-06T18:00:00' as datetime));
+
+#Partie Plezier  9/03(19u30-22u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Partie Plezier%'), cast('2022-03-09T19:30:00' as datetime),cast('2022-03-09T22:00:00' as datetime));
+
+#Fit & Fun minisport (Antwerpen) - krokus  3/03(9u-16u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Fit & Fun minisport (Antwerpen) - krokus%'), cast('2022-03-03T09:00:00' as datetime),cast('2022-03-03T16:00:00' as datetime));
+
+#Fit & Fun minisport (Antwerpen) - krokus  4/03(9u-16u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Fit & Fun minisport (Antwerpen) - krokus%'), cast('2022-03-04T09:00:00' as datetime),cast('2022-03-04T16:00:00' as datetime));
+
+#Koffiestop 2022 16/03(9u30-12u)
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Koffiestop 2022%'), cast('2022-03-16T09:30:00' as datetime),cast('2022-03-16T12:00:00' as datetime));
+
+#Günther Neefs - Roots 66
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Günther Neefs%'), cast('2022-03-14T20:00:00' as datetime),cast('2022-03-14T22:00:00' as datetime));
+
+#Günther Neefs - Roots 66
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Günther Neefs%'), cast('2022-03-25T14:00:00' as datetime),cast('2022-03-25T16:00:00' as datetime));
+
+##Lady Minn - intiem duo concert 21 maart 2022 van 20:00 tot 21:30
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Lady Minn - intiem duo concert%'), cast('2022-03-21T20:00:00' as datetime),cast('2022-03-21T21:30:00' as datetime));
+
+##Lady Minn - intiem duo concert 22 maart 2022 van 20:00 tot 21:30
+insert EventsSchedule (EveId, StartEvent, EndEvent) values((select Id from Evenements where Name Like '%Lady Minn - intiem duo concert%'), cast('2022-03-22T20:00:00' as datetime),cast('2022-03-22T21:30:00' as datetime));

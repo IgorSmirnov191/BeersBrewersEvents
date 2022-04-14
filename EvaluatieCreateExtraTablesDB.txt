@@ -1,0 +1,109 @@
+use javadevt_DotNetVlaanderen4;
+
+CREATE TABLE Managers (
+	Id int(11) NOT NULL AUTO_INCREMENT,
+  	Firstname varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	Surname varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+	DateOfBirth date NOT NULL,
+	Sex char(1) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	Address varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	ZipCode varchar(6) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	City varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+	CONSTRAINT managersPrimary PRIMARY KEY (Id) USING BTREE,
+	CONSTRAINT managersCheckSex CHECK (Sex in ('V','M','N')),
+	CONSTRAINT managersNameBirthdayUnique UNIQUE NONCLUSTERED(Firstname, Surname, DateOfBirth)
+);
+
+CREATE TABLE Cafes (
+	Id int(11) NOT NULL AUTO_INCREMENT,
+  	Name varchar(100) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	ManagerId int(11) NOT NULL,
+  	Address varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	ZipCode varchar(6) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	City varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+	YearOfOpening smallint(6) DEFAULT 0 NOT NULL,
+ 	CONSTRAINT cafePrimary PRIMARY KEY (Id) USING BTREE,
+	CONSTRAINT cafeRefToManager FOREIGN KEY (ManagerId) REFERENCES Managers (Id) 
+	ON UPDATE RESTRICT 
+	ON DELETE RESTRICT,
+	CONSTRAINT cafeCheckYearOpening CHECK (YearOfOpening <= Year(getdate())),
+	CONSTRAINT cafeNameCityUnique UNIQUE NONCLUSTERED(Name, City)
+);
+
+CREATE TABLE EvenementTypes (
+  	Id int(11) NOT NULL AUTO_INCREMENT,
+  	Description varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	CONSTRAINT evetypesPrimary PRIMARY KEY CLUSTERED(Id),
+	CONSTRAINT evetypesDescUnique UNIQUE NONCLUSTERED(Description)
+); 
+
+CREATE TABLE Organizations (
+  	Id int(11) NOT NULL AUTO_INCREMENT,
+  	Name varchar(100) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	CONSTRAINT orgPrimary PRIMARY KEY CLUSTERED(Id),
+	CONSTRAINT orgNameUnique UNIQUE NONCLUSTERED(Name)
+); 
+
+
+
+CREATE TABLE Evenements (
+	Id int(11) NOT NULL AUTO_INCREMENT,
+  	Name varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	Type int(11) NOT NULL,
+	OrganizationId int(11) NOT NULL,
+  	IncomePrice float DEFAULT 0 NOT NULL,
+	City varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+	Address varchar(50) NOT NULL COLLATE 'utf8mb4_general_ci',
+  	ZipCode varchar(6) NOT NULL COLLATE 'utf8mb4_general_ci',
+ 	CONSTRAINT evePrimary PRIMARY KEY (Id) USING BTREE,
+	CONSTRAINT eveRefToEveType FOREIGN KEY (Type) REFERENCES EvenementTypes (Id) 
+	ON UPDATE RESTRICT 
+	ON DELETE RESTRICT,
+	CONSTRAINT eveRefToOrganization FOREIGN KEY (OrganizationId) REFERENCES Organizations (Id) 
+	ON UPDATE RESTRICT 
+	ON DELETE RESTRICT
+	
+);
+
+
+CREATE TABLE EventsSchedule (
+  	EveId int(11) NOT NULL,
+  	StartEvent datetime  NOT NULL,
+	EndEvent datetime  NOT NULL,
+  	CONSTRAINT eveschRefToEvenements FOREIGN KEY (EveId) REFERENCES Evenements (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT
+); 
+
+
+CREATE TABLE BeersOnTap (
+  	CafeId int(11) NOT NULL,
+  	BeerId int(11) NOT NULL,
+  	CONSTRAINT botPrimary PRIMARY KEY CLUSTERED(CafeId, BeerId),
+	CONSTRAINT botRefToCafe FOREIGN KEY (CafeId) REFERENCES Cafes (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT botRefToBeer FOREIGN KEY (BeerId) REFERENCES Beers (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT
+); 
+
+CREATE TABLE CafesBrewers (
+  	CafeId int(11) NOT NULL,
+  	BrewerId int(11) NOT NULL,
+  	CONSTRAINT cbrewPrimary PRIMARY KEY CLUSTERED(CafeId, BrewerId),
+	CONSTRAINT cbrewRefToCafe FOREIGN KEY (CafeId) REFERENCES Cafes (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT cabrewRefToBrewer FOREIGN KEY (BrewerId) REFERENCES Brewers (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+CREATE TABLE EvenementsBrewers (
+  	EveId int(11) NOT NULL,
+  	BrewerId int(11) NOT NULL,
+	BeerId int(11) NOT NULL,
+  	CONSTRAINT evbrewPrimary PRIMARY KEY CLUSTERED(EveId, BrewerId, BeerId),
+	CONSTRAINT evbrewRefToEve FOREIGN KEY (EveId) REFERENCES Evenements (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT evrewRefToBrewer FOREIGN KEY (BrewerId) REFERENCES Brewers (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT evrewRefToBreer FOREIGN KEY (BeerId) REFERENCES Beers (Id) 
+	ON UPDATE RESTRICT ON DELETE RESTRICT
+);
